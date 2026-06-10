@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback, useRef, useMemo } from 'react'
-import { parseHeadings, parseCodeBlocks, parseStats, flattenHeadings } from '@/lib/markdown-parser'
+import { parseHeadings, parseCodeBlocks, parseStats } from '@/lib/markdown-parser'
 import { LeftSidebar } from './left-sidebar'
 import { RightSidebar } from './right-sidebar'
 import { MarkdownViewer } from './markdown-viewer'
@@ -16,12 +16,12 @@ interface DashboardProps {
 export function Dashboard({ content, filename, onReset }: DashboardProps) {
   const [activeId, setActiveId] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
+  const [leftCollapsed, setLeftCollapsed] = useState(false)
   const contentRef = useRef<HTMLDivElement>(null)
 
   const headings = useMemo(() => parseHeadings(content), [content])
   const codeBlocks = useMemo(() => parseCodeBlocks(content), [content])
   const stats = useMemo(() => parseStats(content), [content])
-  const flatHeadings = useMemo(() => flattenHeadings(headings), [headings])
 
   const handleSectionSelect = useCallback((id: string) => {
     setActiveId(id)
@@ -44,7 +44,7 @@ export function Dashboard({ content, filename, onReset }: DashboardProps) {
       <TopHeader
         filename={filename}
         stats={stats}
-        activeSection={activeId}
+        onReset={onReset}
       />
 
       <div className="flex flex-1 overflow-hidden">
@@ -55,33 +55,39 @@ export function Dashboard({ content, filename, onReset }: DashboardProps) {
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
           onSelectSection={handleSectionSelect}
-          onReset={onReset}
           filename={filename}
+          collapsed={leftCollapsed}
+          onToggleCollapse={() => setLeftCollapsed(prev => !prev)}
         />
 
-        {/* Main content area */}
+        {/* Main reading column */}
         <main
           ref={contentRef}
-          className="flex-1 overflow-y-auto px-6 md:px-10 lg:px-16 py-8 min-w-0 scroll-smooth"
+          className="flex-1 overflow-y-auto min-w-0 scroll-smooth"
           role="main"
           aria-label="README content"
         >
-          <div className="max-w-3xl mx-auto">
+          {/* Centered reading column: max 860px, generous vertical padding */}
+          <div className="max-w-[860px] mx-auto px-8 md:px-12 lg:px-16 py-12">
             {searchQuery.trim() && (
-              <div className="mb-6 flex items-center gap-3 px-4 py-3 rounded-lg bg-amber-50 border border-amber-200">
-                <div className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
-                <span className="text-xs text-amber-700 font-medium">
-                  Searching for <span className="font-mono bg-amber-100 px-1 rounded">&quot;{searchQuery}&quot;</span> — highlights shown in content below
+              <div className="mb-8 flex items-center gap-2.5 px-4 py-2.5 rounded-lg bg-amber-50 border border-amber-200/80">
+                <div className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
+                <span className="text-xs text-amber-700">
+                  Showing results for{' '}
+                  <span className="font-mono font-medium bg-amber-100 px-1.5 py-0.5 rounded">
+                    &quot;{searchQuery}&quot;
+                  </span>
                 </span>
               </div>
             )}
+
             <MarkdownViewer
               content={content}
               searchQuery={searchQuery}
               onSectionVisible={handleSectionVisible}
             />
-            {/* Bottom padding */}
-            <div className="h-24" />
+
+            <div className="h-32" />
           </div>
         </main>
 

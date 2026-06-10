@@ -95,71 +95,124 @@
   }
 }
 
-/* Markdown prose styles — light theme */
+/* Markdown prose styles — editorial light theme */
 .readme-prose {
-  /* #374151 */
-  color: oklch(0.35 0.012 264);
-  line-height: 1.7;
+  color: oklch(0.3 0.01 264);
+  line-height: 1.8;
+  font-size: 1rem;
 }
+
+/* Heading hierarchy — generous spacing above, tighter below */
 .readme-prose h1,
 .readme-prose h2,
 .readme-prose h3,
 .readme-prose h4,
 .readme-prose h5,
 .readme-prose h6 {
-  /* #111827 */
-  color: oklch(0.2 0.015 264);
-  font-weight: 600;
-  margin-top: 1.8em;
-  margin-bottom: 0.6em;
+  color: oklch(0.15 0.015 264);
+  font-weight: 650;
+  letter-spacing: -0.01em;
   scroll-margin-top: 5rem;
 }
-/* #E5E7EB border */
-.readme-prose h1 { font-size: 1.9rem; border-bottom: 1px solid oklch(0.92 0.005 264); padding-bottom: 0.4em; }
-.readme-prose h2 { font-size: 1.45rem; border-bottom: 1px solid oklch(0.92 0.005 264); padding-bottom: 0.3em; }
-.readme-prose h3 { font-size: 1.2rem; }
-.readme-prose h4 { font-size: 1.05rem; }
-.readme-prose p { margin: 0.9em 0; }
+.readme-prose h1 {
+  font-size: 2rem;
+  line-height: 1.25;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid oklch(0.92 0.005 264);
+  padding-bottom: 0.6em;
+}
+.readme-prose h2 {
+  font-size: 1.5rem;
+  line-height: 1.3;
+  margin-top: 2.5rem;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid oklch(0.94 0.004 264);
+  padding-bottom: 0.4em;
+}
+.readme-prose h3 {
+  font-size: 1.2rem;
+  line-height: 1.4;
+  margin-top: 2rem;
+  margin-bottom: 0.6rem;
+}
+.readme-prose h4 {
+  font-size: 1.05rem;
+  line-height: 1.5;
+  margin-top: 1.75rem;
+  margin-bottom: 0.5rem;
+}
+.readme-prose h5, .readme-prose h6 {
+  font-size: 0.95rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.4rem;
+  color: oklch(0.35 0.01 264);
+}
+
+/* Body rhythm */
+.readme-prose p {
+  margin-top: 0;
+  margin-bottom: 1.25rem;
+}
+.readme-prose p:last-child { margin-bottom: 0; }
+
+/* Links */
 .readme-prose a {
-  /* #2563EB */
   color: oklch(0.51 0.21 264);
   text-decoration: none;
+  font-weight: 450;
 }
-/* #1D4ED8 */
-.readme-prose a:hover { text-decoration: underline; color: oklch(0.46 0.21 264); }
-.readme-prose ul, .readme-prose ol { padding-left: 1.6em; margin: 0.8em 0; }
-.readme-prose li { margin: 0.3em 0; }
+.readme-prose a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  color: oklch(0.46 0.21 264);
+}
+
+/* Lists */
+.readme-prose ul, .readme-prose ol {
+  padding-left: 1.5em;
+  margin-bottom: 1.25rem;
+}
+.readme-prose li {
+  margin-bottom: 0.4em;
+  line-height: 1.7;
+}
+.readme-prose li > ul, .readme-prose li > ol {
+  margin-top: 0.3em;
+  margin-bottom: 0.3em;
+}
+
+/* Blockquote */
 .readme-prose blockquote {
-  /* #2563EB left bar, #DBEAFE bg */
-  border-left: 3px solid oklch(0.51 0.21 264);
-  padding: 0.4em 1em;
-  margin: 1em 0;
-  background: oklch(0.93 0.04 264 / 50%);
-  border-radius: 0 6px 6px 0;
-  /* #6B7280 */
-  color: oklch(0.52 0.012 264);
+  border-left: 2px solid oklch(0.78 0.08 264);
+  padding: 0.5em 1.2em;
+  margin: 1.5rem 0;
+  background: transparent;
+  border-radius: 0;
+  color: oklch(0.45 0.01 264);
+  font-style: italic;
 }
+
+/* Inline code */
 .readme-prose code {
   font-family: var(--font-geist-mono), monospace;
-  font-size: 0.85em;
-  /* #F5F5F4 bg, #2563EB text */
-  background: oklch(0.961 0.003 60);
-  color: oklch(0.51 0.21 264);
-  padding: 0.15em 0.45em;
+  font-size: 0.84em;
+  background: oklch(0.96 0.003 60);
+  color: oklch(0.38 0.12 264);
+  padding: 0.17em 0.42em;
   border-radius: 4px;
-  /* #E5E7EB */
-  border: 1px solid oklch(0.92 0.005 264);
+  border: 1px solid oklch(0.91 0.005 264);
+  font-weight: 450;
 }
+
+/* Code blocks */
 .readme-prose pre {
-  /* #F5F5F4 */
-  background: oklch(0.961 0.003 60) !important;
-  /* #E5E7EB */
-  border: 1px solid oklch(0.92 0.005 264);
+  background: oklch(0.975 0.002 60) !important;
+  border: 1px solid oklch(0.91 0.005 264);
   border-radius: 8px;
   overflow-x: auto;
-  margin: 1.2em 0;
-  padding: 1.1em 1.3em;
-  box-shadow: 0 1px 3px oklch(0 0 0 / 6%), 0 1px 2px oklch(0 0 0 / 4%);
+  margin: 1.75rem 0;
+  padding: 1.25rem 1.5rem;
 }
 .readme-prose pre code {
   background: transparent !important;
@@ -167,36 +220,42 @@
   padding: 0;
   color: inherit;
   font-size: 0.875rem;
+  line-height: 1.65;
 }
+
+/* Tables */
 .readme-prose table {
   width: 100%;
   border-collapse: collapse;
-  margin: 1.2em 0;
+  margin: 1.75rem 0;
   font-size: 0.9em;
 }
 .readme-prose th {
-  /* #F5F5F4 */
-  background: oklch(0.961 0.003 60);
-  /* #111827 */
+  background: oklch(0.965 0.003 60);
   color: oklch(0.2 0.015 264);
   font-weight: 600;
   text-align: left;
-  padding: 0.65em 1em;
-  /* #E5E7EB */
+  padding: 0.7em 1.1em;
   border: 1px solid oklch(0.92 0.005 264);
+  font-size: 0.8em;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 .readme-prose td {
-  padding: 0.6em 1em;
-  /* #E5E7EB */
-  border: 1px solid oklch(0.92 0.005 264);
-  /* #374151 */
-  color: oklch(0.35 0.012 264);
+  padding: 0.65em 1.1em;
+  border: 1px solid oklch(0.93 0.004 264);
+  color: oklch(0.32 0.01 264);
+  vertical-align: top;
 }
-/* #FAFAF9 stripe */
-.readme-prose tr:nth-child(even) td { background: oklch(0.98 0.003 60); }
-.readme-prose img { max-width: 100%; border-radius: 8px; }
-/* #E5E7EB */
-.readme-prose hr { border: none; border-top: 1px solid oklch(0.92 0.005 264); margin: 2em 0; }
+.readme-prose tr:nth-child(even) td { background: oklch(0.985 0.002 60); }
+
+/* Images and dividers */
+.readme-prose img { max-width: 100%; border-radius: 8px; margin: 1.5rem 0; }
+.readme-prose hr {
+  border: none;
+  border-top: 1px solid oklch(0.92 0.005 264);
+  margin: 3rem 0;
+}
 
 /* Highlight.js — keep background transparent, let pre handle it */
 .hljs { background: transparent !important; }

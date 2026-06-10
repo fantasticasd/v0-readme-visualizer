@@ -21,24 +21,24 @@ export function RightSidebar({ stats, codeBlocks }: RightSidebarProps) {
   return (
     <aside
       className={cn(
-        'flex flex-col border-l border-border bg-sidebar transition-all duration-300 ease-in-out shrink-0',
-        collapsed ? 'w-12' : 'w-72',
+        'flex flex-col border-l border-border bg-background transition-all duration-300 ease-in-out shrink-0',
+        collapsed ? 'w-10' : 'w-68',
       )}
     >
       {/* Header */}
       <div className={cn(
-        'flex items-center border-b border-border px-3 py-3 gap-2 shrink-0',
+        'flex items-center border-b border-border px-2.5 h-10 gap-2 shrink-0',
         collapsed ? 'justify-center' : 'justify-between',
       )}>
         {!collapsed && (
-          <div className="flex gap-1 flex-1 min-w-0">
+          <div className="flex gap-0.5 flex-1 min-w-0">
             <button
               onClick={() => setTab('stats')}
               className={cn(
-                'flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors',
+                'flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-medium transition-colors',
                 tab === 'stats'
-                  ? 'bg-primary/15 text-primary border border-primary/25'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-muted',
+                  ? 'bg-muted text-foreground'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/50',
               )}
             >
               <BarChart2 size={12} />
@@ -47,16 +47,16 @@ export function RightSidebar({ stats, codeBlocks }: RightSidebarProps) {
             <button
               onClick={() => setTab('snippets')}
               className={cn(
-                'flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors relative',
+                'flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-medium transition-colors',
                 tab === 'snippets'
-                  ? 'bg-primary/15 text-primary border border-primary/25'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-muted',
+                  ? 'bg-muted text-foreground'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/50',
               )}
             >
               <Code2 size={12} />
               Snippets
               {codeBlocks.length > 0 && (
-                <span className="ml-1 text-xs bg-muted text-muted-foreground rounded px-1 font-mono">
+                <span className="ml-1 font-mono text-[10px] text-muted-foreground">
                   {codeBlocks.length}
                 </span>
               )}
@@ -66,7 +66,7 @@ export function RightSidebar({ stats, codeBlocks }: RightSidebarProps) {
 
         <button
           onClick={() => setCollapsed(prev => !prev)}
-          className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shrink-0"
+          className="p-1 rounded text-muted-foreground/50 hover:text-muted-foreground transition-colors shrink-0"
           aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
           {collapsed ? <PanelRightOpen size={14} /> : <PanelRightClose size={14} />}
@@ -85,12 +85,12 @@ export function RightSidebar({ stats, codeBlocks }: RightSidebarProps) {
 
       {/* Collapsed tab icons */}
       {collapsed && (
-        <div className="flex flex-col items-center gap-2 pt-3">
+        <div className="flex flex-col items-center gap-1 pt-3">
           <button
             onClick={() => { setCollapsed(false); setTab('stats') }}
             className={cn(
-              'p-2 rounded-md transition-colors',
-              tab === 'stats' ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:text-foreground hover:bg-muted',
+              'p-1.5 rounded transition-colors',
+              tab === 'stats' ? 'text-primary' : 'text-muted-foreground/50 hover:text-muted-foreground',
             )}
             title="Statistics"
           >
@@ -99,8 +99,8 @@ export function RightSidebar({ stats, codeBlocks }: RightSidebarProps) {
           <button
             onClick={() => { setCollapsed(false); setTab('snippets') }}
             className={cn(
-              'p-2 rounded-md transition-colors',
-              tab === 'snippets' ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:text-foreground hover:bg-muted',
+              'p-1.5 rounded transition-colors',
+              tab === 'snippets' ? 'text-primary' : 'text-muted-foreground/50 hover:text-muted-foreground',
             )}
             title="Code Snippets"
           >

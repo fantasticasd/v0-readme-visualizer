@@ -12,14 +12,14 @@ interface StatCardProps {
 
 function StatCard({ icon, label, value, color }: StatCardProps) {
   return (
-    <div className="flex items-center gap-3 p-3 rounded-lg bg-card border border-border hover:border-border/80 transition-colors group">
-      <div className={`p-2 rounded-md ${color} shrink-0`}>
-        {icon}
+    <div className="flex items-center justify-between py-2.5 px-1 border-b border-border/60 last:border-0 group">
+      <div className="flex items-center gap-2.5 min-w-0">
+        <div className={`p-1.5 rounded-md ${color} shrink-0`}>
+          {icon}
+        </div>
+        <span className="text-xs text-muted-foreground">{label}</span>
       </div>
-      <div className="min-w-0">
-        <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider leading-none mb-1">{label}</div>
-        <div className="text-lg font-semibold text-foreground font-mono leading-none">{value}</div>
-      </div>
+      <span className="text-sm font-semibold text-foreground font-mono tabular-nums">{value}</span>
     </div>
   )
 }
@@ -30,10 +30,7 @@ interface StatsCardsProps {
 
 export function StatsCards({ stats }: StatsCardsProps) {
   return (
-    <div className="space-y-2">
-      <div className="px-1 mb-3">
-        <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Statistics</h3>
-      </div>
+    <div>
       <StatCard
         icon={<AlignLeft size={14} className="text-blue-600" />}
         label="Words"

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback } from 'react'
-import { ChevronRight, Hash } from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { HeadingNode } from '@/lib/markdown-parser'
 
@@ -38,71 +38,68 @@ function SectionNode({ node, activeId, searchQuery, onSelect, depth = 0 }: Secti
 
   if (!matches) return null
 
-  const levelColors: Record<number, string> = {
-    1: 'text-foreground font-semibold',
-    2: 'text-foreground/90 font-medium',
-    3: 'text-foreground/80',
-    4: 'text-muted-foreground',
-    5: 'text-muted-foreground',
-    6: 'text-muted-foreground',
-  }
-
-  const indentSizes: Record<number, string> = {
-    0: '',
-    1: 'pl-3',
-    2: 'pl-5',
-    3: 'pl-7',
-    4: 'pl-9',
-    5: 'pl-11',
-  }
+  // Indent by depth — each level adds 12px of left padding
+  const paddingLeft = 8 + depth * 12
 
   return (
     <div>
       <div
         className={cn(
-          'group flex items-center gap-1.5 py-1 px-2 rounded-md cursor-pointer text-sm transition-all duration-150',
-          indentSizes[depth] ?? 'pl-11',
+          'group relative flex items-center gap-1 py-1 pr-2 rounded-md cursor-pointer transition-all duration-100 select-none',
           isActive
-            ? 'bg-primary/15 text-primary border border-primary/20'
-            : 'hover:bg-muted/60 text-muted-foreground hover:text-foreground',
-          textMatches && searchQuery.trim() ? 'bg-amber-500/10' : '',
+            ? 'bg-accent/60 text-primary'
+            : 'text-muted-foreground hover:text-foreground hover:bg-muted/50',
+          textMatches && searchQuery.trim() && !isActive ? 'text-foreground' : '',
         )}
+        style={{ paddingLeft }}
         onClick={handleClick}
         role="button"
         tabIndex={0}
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleClick() }}
         aria-current={isActive ? 'true' : undefined}
       >
-        {/* Toggle button */}
-        <button
+        {/* Active indicator bar */}
+        {isActive && (
+          <span className="absolute left-0 top-1 bottom-1 w-0.5 rounded-full bg-primary" />
+        )}
+
+        {/* Expand/collapse chevron */}
+        <span
           className={cn(
-            'shrink-0 w-4 h-4 flex items-center justify-center rounded text-muted-foreground/50 hover:text-muted-foreground transition-all',
+            'shrink-0 w-3.5 h-3.5 flex items-center justify-center',
             !hasChildren && 'invisible pointer-events-none',
           )}
           onClick={handleToggle}
+          role="button"
           aria-label={expanded ? 'Collapse' : 'Expand'}
           tabIndex={-1}
         >
           <ChevronRight
             size={10}
-            className={cn('transition-transform duration-200', expanded && 'rotate-90')}
+            className={cn(
+              'text-muted-foreground/40 transition-transform duration-150',
+              expanded && 'rotate-90',
+              'group-hover:text-muted-foreground/70',
+            )}
           />
-        </button>
+        </span>
 
-        {/* Level indicator */}
-        {depth === 0 && (
-          <Hash size={11} className={cn('shrink-0', isActive ? 'text-primary' : 'text-muted-foreground/40')} />
-        )}
-
-        <span className={cn('truncate text-xs leading-relaxed', levelColors[node.level] ?? 'text-muted-foreground', isActive && 'text-primary')}>
+        {/* Label */}
+        <span
+          className={cn(
+            'truncate leading-relaxed',
+            depth === 0 ? 'text-xs font-medium' : 'text-xs font-normal',
+            isActive && 'font-medium',
+          )}
+        >
           {node.text}
         </span>
       </div>
 
-      {/* Children */}
+      {/* Children with vertical guide line */}
       {hasChildren && expanded && (
-        <div className="relative ml-2">
-          <div className="absolute left-2 top-0 bottom-0 w-px bg-border/50" />
+        <div className="relative" style={{ marginLeft: paddingLeft + 8 }}>
+          <span className="absolute left-1.5 top-0 bottom-0 w-px bg-border" />
           {node.children.map(child => (
             <SectionNode
               key={child.id}
@@ -127,34 +124,25 @@ interface SectionTreeProps {
 }
 
 export function SectionTree({ headings, activeId, searchQuery, onSelect }: SectionTreeProps) {
-  const visibleCount = headings.filter(h => matchesSearch(h, searchQuery)).length
+  if (headings.length === 0) {
+    return (
+      <div className="py-8 text-center text-xs text-muted-foreground/50">
+        No sections found
+      </div>
+    )
+  }
 
   return (
-    <div className="space-y-0.5">
-      <div className="px-1 mb-3 flex items-center justify-between">
-        <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-          Sections
-        </h3>
-        <span className="text-xs text-muted-foreground/60 font-mono">
-          {searchQuery.trim() ? `${visibleCount} match` : `${headings.length} top`}
-        </span>
-      </div>
-
-      {headings.length === 0 ? (
-        <div className="text-center py-8 text-muted-foreground text-xs">
-          No sections found
-        </div>
-      ) : (
-        headings.map(node => (
-          <SectionNode
-            key={node.id}
-            node={node}
-            activeId={activeId}
-            searchQuery={searchQuery}
-            onSelect={onSelect}
-          />
-        ))
-      )}
+    <div className="space-y-0.5 pb-4">
+      {headings.map(node => (
+        <SectionNode
+          key={node.id}
+          node={node}
+          activeId={activeId}
+          searchQuery={searchQuery}
+          onSelect={onSelect}
+        />
+      ))}
     </div>
   )
 }
