@@ -6,18 +6,18 @@ import { cn } from '@/lib/utils'
 import type { CodeBlock } from '@/lib/markdown-parser'
 
 const LANGUAGE_COLORS: Record<string, { bg: string; text: string; label: string }> = {
-  typescript: { bg: 'bg-blue-500/15', text: 'text-blue-400', label: 'TypeScript' },
-  tsx: { bg: 'bg-blue-500/15', text: 'text-blue-400', label: 'TSX' },
-  javascript: { bg: 'bg-amber-500/15', text: 'text-amber-400', label: 'JavaScript' },
-  jsx: { bg: 'bg-amber-500/15', text: 'text-amber-400', label: 'JSX' },
-  bash: { bg: 'bg-green-500/15', text: 'text-green-400', label: 'Bash' },
-  shell: { bg: 'bg-green-500/15', text: 'text-green-400', label: 'Shell' },
-  sh: { bg: 'bg-green-500/15', text: 'text-green-400', label: 'Shell' },
-  python: { bg: 'bg-yellow-500/15', text: 'text-yellow-400', label: 'Python' },
-  html: { bg: 'bg-orange-500/15', text: 'text-orange-400', label: 'HTML' },
-  css: { bg: 'bg-cyan-500/15', text: 'text-cyan-400', label: 'CSS' },
-  json: { bg: 'bg-rose-500/15', text: 'text-rose-400', label: 'JSON' },
-  powershell: { bg: 'bg-blue-500/15', text: 'text-blue-400', label: 'PowerShell' },
+  typescript: { bg: 'bg-blue-50', text: 'text-blue-700', label: 'TypeScript' },
+  tsx: { bg: 'bg-blue-50', text: 'text-blue-700', label: 'TSX' },
+  javascript: { bg: 'bg-amber-50', text: 'text-amber-700', label: 'JavaScript' },
+  jsx: { bg: 'bg-amber-50', text: 'text-amber-700', label: 'JSX' },
+  bash: { bg: 'bg-emerald-50', text: 'text-emerald-700', label: 'Bash' },
+  shell: { bg: 'bg-emerald-50', text: 'text-emerald-700', label: 'Shell' },
+  sh: { bg: 'bg-emerald-50', text: 'text-emerald-700', label: 'Shell' },
+  python: { bg: 'bg-yellow-50', text: 'text-yellow-700', label: 'Python' },
+  html: { bg: 'bg-orange-50', text: 'text-orange-700', label: 'HTML' },
+  css: { bg: 'bg-cyan-50', text: 'text-cyan-700', label: 'CSS' },
+  json: { bg: 'bg-rose-50', text: 'text-rose-700', label: 'JSON' },
+  powershell: { bg: 'bg-blue-50', text: 'text-blue-700', label: 'PowerShell' },
   text: { bg: 'bg-muted', text: 'text-muted-foreground', label: 'Text' },
 }
 
@@ -70,7 +70,7 @@ function CodeSnippetItem({ block, index }: CodeSnippetItemProps) {
             className={cn(
               'flex items-center gap-1 px-2 py-1 rounded text-xs transition-all',
               copied
-                ? 'bg-green-500/15 text-green-400'
+                ? 'bg-emerald-50 text-emerald-700'
                 : 'text-muted-foreground hover:text-foreground hover:bg-muted',
             )}
             aria-label="Copy code"

@@ -35,46 +35,46 @@ export function StatsCards({ stats }: StatsCardsProps) {
         <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Statistics</h3>
       </div>
       <StatCard
-        icon={<AlignLeft size={14} className="text-blue-400" />}
+        icon={<AlignLeft size={14} className="text-blue-600" />}
         label="Words"
         value={stats.wordCount.toLocaleString()}
-        color="bg-blue-500/10"
+        color="bg-blue-50"
       />
       <StatCard
-        icon={<Hash size={14} className="text-violet-400" />}
+        icon={<Hash size={14} className="text-violet-600" />}
         label="Headings"
         value={stats.headingCount}
-        color="bg-violet-500/10"
+        color="bg-violet-50"
       />
       <StatCard
-        icon={<Code2 size={14} className="text-green-400" />}
+        icon={<Code2 size={14} className="text-emerald-600" />}
         label="Code Blocks"
         value={stats.codeBlockCount}
-        color="bg-green-500/10"
+        color="bg-emerald-50"
       />
       <StatCard
-        icon={<Link2 size={14} className="text-amber-400" />}
+        icon={<Link2 size={14} className="text-amber-600" />}
         label="Links"
         value={stats.linkCount}
-        color="bg-amber-500/10"
+        color="bg-amber-50"
       />
       <StatCard
-        icon={<Image size={14} className="text-rose-400" />}
+        icon={<Image size={14} className="text-rose-600" />}
         label="Images"
         value={stats.imageCount}
-        color="bg-rose-500/10"
+        color="bg-rose-50"
       />
       <StatCard
-        icon={<BookOpen size={14} className="text-cyan-400" />}
+        icon={<BookOpen size={14} className="text-cyan-600" />}
         label="Lines"
         value={stats.lineCount.toLocaleString()}
-        color="bg-cyan-500/10"
+        color="bg-cyan-50"
       />
       <StatCard
-        icon={<Clock size={14} className="text-orange-400" />}
+        icon={<Clock size={14} className="text-orange-600" />}
         label="Read Time"
         value={`~${stats.readingTime}m`}
-        color="bg-orange-500/10"
+        color="bg-orange-50"
       />
     </div>
   )

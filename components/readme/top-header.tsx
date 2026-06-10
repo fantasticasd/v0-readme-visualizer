@@ -58,10 +58,10 @@ export function TopHeader({ filename, stats, activeSection }: TopHeaderProps) {
         <div
           className={cn(
             'flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium border',
-            'bg-green-500/10 border-green-500/20 text-green-400',
+            'bg-emerald-50 border-emerald-200 text-emerald-700',
           )}
         >
-          <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
           <span className="hidden sm:inline">Live</span>
         </div>
       </div>

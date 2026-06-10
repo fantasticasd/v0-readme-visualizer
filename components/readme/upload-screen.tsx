@@ -83,7 +83,7 @@ export function UploadScreen({ onLoad, onLoadMock }: UploadScreenProps) {
           </div>
 
           {/* Upload card */}
-          <div className="rounded-xl border border-border bg-card overflow-hidden shadow-2xl shadow-black/30">
+          <div className="rounded-xl border border-border bg-card overflow-hidden shadow-lg shadow-gray-200/80">
             {/* Tabs */}
             <div className="flex border-b border-border">
               {(['drop', 'paste'] as Mode[]).map(m => (

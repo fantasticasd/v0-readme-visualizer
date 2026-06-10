@@ -68,10 +68,10 @@ export function Dashboard({ content, filename, onReset }: DashboardProps) {
         >
           <div className="max-w-3xl mx-auto">
             {searchQuery.trim() && (
-              <div className="mb-6 flex items-center gap-3 px-4 py-3 rounded-lg bg-amber-500/8 border border-amber-500/20">
-                <div className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
-                <span className="text-xs text-amber-400 font-medium">
-                  Searching for <span className="font-mono bg-amber-500/15 px-1 rounded">&quot;{searchQuery}&quot;</span> — highlights shown in content below
+              <div className="mb-6 flex items-center gap-3 px-4 py-3 rounded-lg bg-amber-50 border border-amber-200">
+                <div className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
+                <span className="text-xs text-amber-700 font-medium">
+                  Searching for <span className="font-mono bg-amber-100 px-1 rounded">&quot;{searchQuery}&quot;</span> — highlights shown in content below
                 </span>
               </div>
             )}

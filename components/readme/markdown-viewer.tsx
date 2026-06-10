@@ -6,7 +6,7 @@ import remarkGfm from 'remark-gfm'
 import rehypeRaw from 'rehype-raw'
 import rehypeHighlight from 'rehype-highlight'
 import { slugify } from '@/lib/markdown-parser'
-import 'highlight.js/styles/github-dark.css'
+import 'highlight.js/styles/github.css'
 
 interface MarkdownViewerProps {
   content: string
