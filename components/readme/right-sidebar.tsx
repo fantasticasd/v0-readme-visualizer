@@ -5,13 +5,28 @@ import { BarChart2, Code2, PanelRightClose, PanelRightOpen } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { StatsCards } from './stats-cards'
 import { CodeSnippets } from './code-snippets'
-import type { ReadmeStats, CodeBlock } from '@/lib/markdown-parser'
+interface StatsShape {
+  wordCount: number
+  headingCount: number
+  codeBlockCount: number
+  linkCount: number
+  imageCount: number
+  lineCount: number
+  readingTime: number
+}
+
+interface CodeBlockShape {
+  id: string
+  language: string
+  code: string
+  lineCount: number
+}
 
 type Tab = 'stats' | 'snippets'
 
 interface RightSidebarProps {
-  stats: ReadmeStats
-  codeBlocks: CodeBlock[]
+  stats: StatsShape
+  codeBlocks: CodeBlockShape[]
 }
 
 export function RightSidebar({ stats, codeBlocks }: RightSidebarProps) {

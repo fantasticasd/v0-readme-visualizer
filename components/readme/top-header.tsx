@@ -1,11 +1,16 @@
 'use client'
 
 import { BookOpen, FileText, RotateCcw } from 'lucide-react'
-import type { ReadmeStats } from '@/lib/markdown-parser'
+interface StatsShape {
+  wordCount: number
+  headingCount: number
+  codeBlockCount: number
+  readingTime: number
+}
 
 interface TopHeaderProps {
   filename: string
-  stats: ReadmeStats
+  stats: StatsShape
   onReset: () => void
 }
 

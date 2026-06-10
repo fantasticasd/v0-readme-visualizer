@@ -1,7 +1,16 @@
 'use client'
 
 import { BookOpen, Code2, Hash, Image, Link2, Clock, AlignLeft } from 'lucide-react'
-import type { ReadmeStats } from '@/lib/markdown-parser'
+/** Compat shape produced by the dashboard adapter */
+interface StatsShape {
+  wordCount: number
+  headingCount: number
+  codeBlockCount: number
+  linkCount: number
+  imageCount: number
+  lineCount: number
+  readingTime: number
+}
 
 interface StatCardProps {
   icon: React.ReactNode
@@ -25,7 +34,7 @@ function StatCard({ icon, label, value, color }: StatCardProps) {
 }
 
 interface StatsCardsProps {
-  stats: ReadmeStats
+  stats: StatsShape
 }
 
 export function StatsCards({ stats }: StatsCardsProps) {

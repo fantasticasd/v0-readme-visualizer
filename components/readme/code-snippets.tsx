@@ -3,7 +3,12 @@
 import { useState } from 'react'
 import { Check, Copy, Code2, ChevronDown, ChevronUp } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import type { CodeBlock } from '@/lib/markdown-parser'
+interface CodeBlock {
+  id: string
+  language: string
+  code: string
+  lineCount: number
+}
 
 const LANGUAGE_COLORS: Record<string, { bg: string; text: string; label: string }> = {
   typescript: { bg: 'bg-blue-50', text: 'text-blue-700', label: 'TypeScript' },

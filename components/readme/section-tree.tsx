@@ -3,7 +3,13 @@
 import { useState, useCallback } from 'react'
 import { ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import type { HeadingNode } from '@/lib/markdown-parser'
+/** Compat shape for the tree — matches what dashboard's adapter emits */
+interface HeadingNode {
+  id: string
+  text: string
+  level: number
+  children: HeadingNode[]
+}
 
 interface SectionNodeProps {
   node: HeadingNode

@@ -4,7 +4,12 @@ import { PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { SectionTree } from './section-tree'
 import { SearchBar } from './search-bar'
-import type { HeadingNode } from '@/lib/markdown-parser'
+interface HeadingNode {
+  id: string
+  text: string
+  level: number
+  children: HeadingNode[]
+}
 
 interface LeftSidebarProps {
   headings: HeadingNode[]
