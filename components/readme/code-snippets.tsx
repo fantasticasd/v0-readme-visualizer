@@ -4,7 +4,6 @@ import { useState, useMemo } from 'react'
 import { Check, Copy, Code2, ChevronDown, ChevronUp } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import hljs from 'highlight.js'
-import 'highlight.js/styles/github.css'
 interface CodeBlock {
   id: string
   language: string
@@ -112,12 +111,16 @@ function CodeSnippetItem({ block, index }: CodeSnippetItemProps) {
       {/* Code */}
       {expanded && (
         <div className="relative">
-          <pre className={cn(
-            'overflow-x-auto p-3 text-xs font-mono leading-relaxed !bg-transparent',
-            isLong && 'max-h-48 overflow-y-auto',
-          )}>
+          <pre
+            className={cn(
+              'overflow-x-auto p-3 text-xs font-mono leading-relaxed rounded-b-lg',
+              isLong && 'max-h-48 overflow-y-auto',
+            )}
+            style={{ background: '#f6f8fa' }}
+          >
             <code
               className={cn('hljs', block.language && `language-${block.language.toLowerCase()}`)}
+              style={{ background: 'transparent' }}
               dangerouslySetInnerHTML={{ __html: highlightedHtml }}
             />
           </pre>

@@ -257,8 +257,8 @@
   margin: 3rem 0;
 }
 
-/* Highlight.js — keep background transparent, let pre handle it */
-.hljs { background: transparent !important; }
+/* Highlight.js — in prose the <pre> owns the background; keep <code> transparent */
+.readme-prose .hljs { background: transparent !important; }
 
 /* Search highlight — #F59E0B amber tint */
 mark.search-highlight {
