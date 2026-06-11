@@ -1,7 +1,9 @@
 'use client'
 
-import { BookOpen, FileText, RotateCcw } from 'lucide-react'
+import { BookOpen, FileText, RotateCcw, List, GitBranch } from 'lucide-react'
 import { ThemeToggle } from './theme-toggle'
+import { cn } from '@/lib/utils'
+
 interface StatsShape {
   wordCount: number
   headingCount: number
@@ -9,13 +11,17 @@ interface StatsShape {
   readingTime: number
 }
 
+export type ViewMode = 'tree' | 'mindmap'
+
 interface TopHeaderProps {
   filename: string
   stats: StatsShape
   onReset: () => void
+  activeView: ViewMode
+  onViewChange: (v: ViewMode) => void
 }
 
-export function TopHeader({ filename, stats, onReset }: TopHeaderProps) {
+export function TopHeader({ filename, stats, onReset, activeView, onViewChange }: TopHeaderProps) {
   return (
     <header className="flex items-center justify-between px-6 h-12 border-b border-border bg-card shrink-0 gap-6">
       {/* Left: wordmark + file */}
@@ -52,6 +58,36 @@ export function TopHeader({ filename, stats, onReset }: TopHeaderProps) {
             <span className="font-mono font-medium text-foreground tabular-nums">~{stats.readingTime}m</span>
             <span className="ml-1">read</span>
           </span>
+        </div>
+
+        {/* View toggle */}
+        <div className="flex items-center gap-0.5 bg-muted rounded-md p-0.5">
+          <button
+            onClick={() => onViewChange('tree')}
+            className={cn(
+              'flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium transition-colors',
+              activeView === 'tree'
+                ? 'bg-background text-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground',
+            )}
+            aria-label="Tree view"
+          >
+            <List size={12} />
+            <span className="hidden sm:inline">Tree</span>
+          </button>
+          <button
+            onClick={() => onViewChange('mindmap')}
+            className={cn(
+              'flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium transition-colors',
+              activeView === 'mindmap'
+                ? 'bg-background text-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground',
+            )}
+            aria-label="Mind map view"
+          >
+            <GitBranch size={12} />
+            <span className="hidden sm:inline">Mind Map</span>
+          </button>
         </div>
 
         <ThemeToggle />

@@ -5,7 +5,8 @@ import { processDocument } from '@/lib/document-pipeline'
 import { LeftSidebar } from './left-sidebar'
 import { RightSidebar } from './right-sidebar'
 import { MarkdownViewer } from './markdown-viewer'
-import { TopHeader } from './top-header'
+import { TopHeader, type ViewMode } from './top-header'
+import { MindMap } from './mind-map'
 
 interface DashboardProps {
   content: string
@@ -18,6 +19,7 @@ export function Dashboard({ content, filename, onReset }: DashboardProps) {
   const [activeId, setActiveId] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const [leftCollapsed, setLeftCollapsed] = useState(false)
+  const [activeView, setActiveView] = useState<ViewMode>('tree')
   const contentRef = useRef<HTMLDivElement>(null)
 
   // ---- Parsing state: single memoized pipeline call ----
@@ -92,6 +94,8 @@ export function Dashboard({ content, filename, onReset }: DashboardProps) {
         filename={filename}
         stats={statsCompat}
         onReset={onReset}
+        activeView={activeView}
+        onViewChange={setActiveView}
       />
 
       <div className="flex flex-1 overflow-hidden">
@@ -107,37 +111,44 @@ export function Dashboard({ content, filename, onReset }: DashboardProps) {
           onToggleCollapse={() => setLeftCollapsed(prev => !prev)}
         />
 
-        {/* Main reading column */}
-        <main
-          ref={contentRef}
-          className="flex-1 overflow-y-auto min-w-0 scroll-smooth"
-          role="main"
-          aria-label="README content"
-        >
-          <div className="max-w-[860px] mx-auto px-8 md:px-12 lg:px-16 py-12">
-            {searchQuery.trim() && (
-              <div className="mb-8 flex items-center gap-2.5 px-4 py-2.5 rounded-lg bg-amber-50 border border-amber-200/80">
-                <div className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
-                <span className="text-xs text-amber-700">
-                  Showing results for{' '}
-                  <span className="font-mono font-medium bg-amber-100 px-1.5 py-0.5 rounded">
-                    &quot;{searchQuery}&quot;
+        {/* Main area — reader or mind map */}
+        {activeView === 'mindmap' ? (
+          <MindMap
+            sections={doc.sections}
+            activeId={activeId}
+            onSelectSection={handleSectionSelect}
+          />
+        ) : (
+          <main
+            ref={contentRef}
+            className="flex-1 overflow-y-auto min-w-0 scroll-smooth"
+            role="main"
+            aria-label="README content"
+          >
+            <div className="max-w-[860px] mx-auto px-8 md:px-12 lg:px-16 py-12">
+              {searchQuery.trim() && (
+                <div className="mb-8 flex items-center gap-2.5 px-4 py-2.5 rounded-lg bg-amber-50 border border-amber-200/80">
+                  <div className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
+                  <span className="text-xs text-amber-700">
+                    Showing results for{' '}
+                    <span className="font-mono font-medium bg-amber-100 px-1.5 py-0.5 rounded">
+                      &quot;{searchQuery}&quot;
+                    </span>
                   </span>
-                </span>
-              </div>
-            )}
+                </div>
+              )}
 
-            <MarkdownViewer
-              content={content}
-              searchQuery={searchQuery}
-              onSectionVisible={handleSectionVisible}
-              // Pass the flat section list so the viewer uses pipeline IDs
-              sectionIds={doc.flatSections.map(s => ({ id: s.id, title: s.title }))}
-            />
+              <MarkdownViewer
+                content={content}
+                searchQuery={searchQuery}
+                onSectionVisible={handleSectionVisible}
+                sectionIds={doc.flatSections.map(s => ({ id: s.id, title: s.title }))}
+              />
 
-            <div className="h-32" />
-          </div>
-        </main>
+              <div className="h-32" />
+            </div>
+          </main>
+        )}
 
         {/* Right Sidebar */}
         <RightSidebar stats={statsCompat} codeBlocks={codeBlocksCompat} />
