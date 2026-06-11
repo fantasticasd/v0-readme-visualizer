@@ -1,9 +1,7 @@
 'use client'
 
-import { useState } from 'react'
 import { BookOpen, FileText, RotateCcw, List, GitBranch } from 'lucide-react'
 import { ThemeToggle } from './theme-toggle'
-import { ExportSource } from './export-source'
 import { cn } from '@/lib/utils'
 
 interface StatsShape {
@@ -24,11 +22,7 @@ interface TopHeaderProps {
 }
 
 export function TopHeader({ filename, stats, onReset, activeView, onViewChange }: TopHeaderProps) {
-  const [exportOpen, setExportOpen] = useState(false)
-
   return (
-    <>
-    <ExportSource open={exportOpen} onClose={() => setExportOpen(false)} />
     <header className="flex items-center justify-between px-6 h-12 border-b border-border bg-card shrink-0 gap-6">
       {/* Left: wordmark + file */}
       <div className="flex items-center gap-3 min-w-0">
@@ -99,16 +93,6 @@ export function TopHeader({ filename, stats, onReset, activeView, onViewChange }
         <ThemeToggle />
 
         <button
-          onClick={() => setExportOpen(true)}
-          className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-          aria-label="Open source & self-hosting"
-          title="Open source & self-hosting"
-        >
-          <GitBranch size={13} />
-          <span className="hidden md:inline">Source</span>
-        </button>
-
-        <button
           onClick={onReset}
           className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
           aria-label="Load a different README"
@@ -118,6 +102,5 @@ export function TopHeader({ filename, stats, onReset, activeView, onViewChange }
         </button>
       </div>
     </header>
-    </>
   )
 }

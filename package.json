@@ -1,19 +1,11 @@
 {
-  "name": "readme-visualizer",
-  "version": "1.0.0",
-  "description": "Transform large README.md files into an interactive dashboard — fully static, no backend required.",
-  "homepage": "https://github.com/fantasticasd/v0-readme-visualizer",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/fantasticasd/v0-readme-visualizer.git"
-  },
-  "license": "MIT",
-  "private": false,
+  "name": "my-project",
+  "version": "0.1.0",
+  "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "export": "next build",
-    "start": "npx serve out",
+    "start": "next start",
     "lint": "eslint ."
   },
   "dependencies": {

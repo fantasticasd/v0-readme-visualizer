@@ -1,120 +1,33 @@
-# README Visualizer
+# v0-readme-visualizer
 
-Transform large `README.md` files into an interactive dashboard with search, section navigation, statistics, code snippets, and a mind-map view.
+This is a [Next.js](https://nextjs.org) project bootstrapped with [v0](https://v0.app).
 
-**Fully static. No backend. No API keys. No Vercel required.**
+## Built with v0
 
----
+This repository is linked to a [v0](https://v0.app) project. You can continue developing by visiting the link below -- start new chats to make changes, and v0 will push commits directly to this repo. Every merge to `main` will automatically deploy.
 
-## Features
+[Continue working on v0 →](https://v0.app/chat/projects/prj_75L14tFiP05v2VY6ppBQz9c4H8pI)
 
-- Drag-and-drop or paste any Markdown file
-- Collapsible section tree (left sidebar)
-- Full Markdown rendering with syntax-highlighted code blocks
-- Statistics panel: word count, headings, links, images, read time
-- Code snippets panel with one-click copy
-- Mind map visualization of the heading hierarchy
-- Full-text search with result highlighting
-- Light / dark theme (persisted to `localStorage`)
-- 100% client-side — works offline after first load
+## Getting Started
 
----
-
-## Running locally
-
-```bash
-git clone https://github.com/fantasticasd/v0-readme-visualizer.git
-cd v0-readme-visualizer
-
-npm install        # or pnpm install / yarn install
-npm run build      # produces the out/ directory
-npm start          # serves out/ on http://localhost:3000
-```
-
-For development with hot reload:
+First, run the development server:
 
 ```bash
 npm run dev
+# or
+yarn dev
+# or
+pnpm dev
 ```
 
----
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## Self-hosting / Running without Vercel
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-The `npm run build` command produces a fully self-contained `out/` directory of static HTML, CSS, and JS. Serve it with any HTTP server:
+## Learn More
 
-```bash
-# Node
-npx serve out
+To learn more, take a look at the following resources:
 
-# Python
-python -m http.server 3000 --directory out
-
-# nginx — point root to out/
-```
-
-### GitHub Pages
-
-1. Fork this repository.
-2. Go to **Settings → Pages** and set source to **GitHub Actions**.
-3. Push to `main` — the included workflow (`.github/workflows/deploy.yml`) builds and deploys automatically.
-
-If deploying to a sub-path (e.g. `username.github.io/readme-visualizer`), add this to `next.config.mjs`:
-
-```js
-basePath: '/readme-visualizer',
-assetPrefix: '/readme-visualizer/',
-```
-
-### Netlify
-
-| Setting | Value |
-|---|---|
-| Build command | `npm run build` |
-| Publish directory | `out` |
-| Environment variables | none |
-
-### Cloudflare Pages
-
-| Setting | Value |
-|---|---|
-| Framework preset | Next.js (Static HTML Export) |
-| Build command | `npm run build` |
-| Build output directory | `out` |
-
----
-
-## Tech stack
-
-| Concern | Library |
-|---|---|
-| Framework | Next.js 16 (static export) |
-| Markdown parsing | `remark-parse` + `unified` |
-| Markdown rendering | `react-markdown` + `rehype-highlight` |
-| Syntax highlighting | `highlight.js` (github theme) |
-| Styling | Tailwind CSS v4 |
-| Icons | `lucide-react` |
-| File upload | `react-dropzone` |
-
-All processing runs in the browser. No server-side code is used at runtime.
-
----
-
-## Contributing
-
-Pull requests are welcome. To add a feature:
-
-```bash
-git checkout -b my-feature
-npm run dev        # start dev server
-# make your changes
-git commit -m "feat: describe your change"
-git push origin my-feature
-# open a pull request
-```
-
----
-
-## License
-
-MIT
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- [v0 Documentation](https://v0.app/docs) - learn about v0 and how to use it.
