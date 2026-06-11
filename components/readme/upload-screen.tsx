@@ -5,6 +5,7 @@ import { useDropzone } from 'react-dropzone'
 import { FileText, Upload, ClipboardPaste, ArrowRight, BookOpen, Code2, Hash, GitBranch } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ThemeToggle } from './theme-toggle'
+import { GlowNet } from './glow-net'
 
 interface UploadScreenProps {
   onLoad: (content: string) => void
@@ -68,8 +69,11 @@ export function UploadScreen({ onLoad, onLoadMock }: UploadScreenProps) {
       </header>
 
       {/* Main */}
-      <main className="flex-1 flex flex-col items-center justify-center px-6 py-16">
-        <div className="w-full max-w-2xl space-y-8">
+      <main className="relative flex-1 flex flex-col items-center justify-center px-6 py-16">
+        {/* Blue neon dot-grid glow — decorative background */}
+        <GlowNet />
+
+        <div className="relative z-10 w-full max-w-2xl space-y-8">
           {/* Hero */}
           <div className="text-center space-y-3">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-medium mb-2">
