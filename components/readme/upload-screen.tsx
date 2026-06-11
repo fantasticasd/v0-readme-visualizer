@@ -6,6 +6,7 @@ import { FileText, Upload, ClipboardPaste, ArrowRight, BookOpen, Code2, Hash, Gi
 import { cn } from '@/lib/utils'
 import { ThemeToggle } from './theme-toggle'
 import { GlowNet } from './glow-net'
+import { ExportSource } from './export-source'
 
 interface UploadScreenProps {
   onLoad: (content: string) => void
@@ -18,6 +19,7 @@ export function UploadScreen({ onLoad, onLoadMock }: UploadScreenProps) {
   const [mode, setMode] = useState<Mode>('drop')
   const [pasteContent, setPasteContent] = useState('')
   const [isDragOver, setIsDragOver] = useState(false)
+  const [exportOpen, setExportOpen] = useState(false)
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
@@ -49,6 +51,8 @@ export function UploadScreen({ onLoad, onLoadMock }: UploadScreenProps) {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <ExportSource open={exportOpen} onClose={() => setExportOpen(false)} />
+
       {/* Top nav */}
       <header className="border-b border-border px-6 py-3 flex items-center gap-3">
         <div className="flex items-center gap-2">
@@ -65,6 +69,13 @@ export function UploadScreen({ onLoad, onLoadMock }: UploadScreenProps) {
             <GitBranch size={11} /> Local only
           </span>
           <ThemeToggle />
+          <button
+            onClick={() => setExportOpen(true)}
+            className="flex items-center gap-1.5 px-2 py-1 rounded bg-muted/50 border border-border text-xs text-muted-foreground hover:text-foreground transition-colors"
+            aria-label="Open source & self-hosting"
+          >
+            <GitBranch size={11} /> Source
+          </button>
         </div>
       </header>
 
