@@ -6,6 +6,7 @@ import { FileText, Upload, ClipboardPaste, ArrowRight, BookOpen, Code2, Hash, Gi
 import { cn } from '@/lib/utils'
 import { ThemeToggle } from './theme-toggle'
 import { GlowNet } from './glow-net'
+import { ExportButton } from './export-button'
 
 interface UploadScreenProps {
   onLoad: (content: string) => void
@@ -64,6 +65,7 @@ export function UploadScreen({ onLoad, onLoadMock }: UploadScreenProps) {
           <span className="flex items-center gap-1 px-2 py-1 rounded bg-muted/50 border border-border">
             <GitBranch size={11} /> Local only
           </span>
+          <ExportButton />
           <ThemeToggle />
         </div>
       </header>
