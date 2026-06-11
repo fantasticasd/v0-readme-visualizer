@@ -1,8 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Check, Copy, Code2, ChevronDown, ChevronUp } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import hljs from 'highlight.js'
+import 'highlight.js/styles/github.css'
 interface CodeBlock {
   id: string
   language: string
@@ -40,6 +42,24 @@ function CodeSnippetItem({ block, index }: CodeSnippetItemProps) {
   const [expanded, setExpanded] = useState(index < 3)
   const langStyle = getLangStyle(block.language)
   const isLong = block.lineCount > 8
+
+  // Produce highlighted HTML once per block — memoised so it never re-runs
+  const highlightedHtml = useMemo(() => {
+    const lang = block.language?.toLowerCase()
+    try {
+      if (lang && hljs.getLanguage(lang)) {
+        return hljs.highlight(block.code, { language: lang }).value
+      }
+      // Auto-detect for unknown / unlabelled blocks
+      return hljs.highlightAuto(block.code).value
+    } catch {
+      // Fallback: escape HTML entities and render as plain text
+      return block.code
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+    }
+  }, [block.code, block.language])
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(block.code)
@@ -93,10 +113,13 @@ function CodeSnippetItem({ block, index }: CodeSnippetItemProps) {
       {expanded && (
         <div className="relative">
           <pre className={cn(
-            'overflow-x-auto p-3 text-xs font-mono leading-relaxed',
+            'overflow-x-auto p-3 text-xs font-mono leading-relaxed !bg-transparent',
             isLong && 'max-h-48 overflow-y-auto',
           )}>
-            <code className="text-foreground/85">{block.code}</code>
+            <code
+              className={cn('hljs', block.language && `language-${block.language.toLowerCase()}`)}
+              dangerouslySetInnerHTML={{ __html: highlightedHtml }}
+            />
           </pre>
         </div>
       )}
