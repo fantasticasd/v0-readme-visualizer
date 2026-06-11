@@ -108,6 +108,12 @@ export interface DocumentSection {
   index: number
   children: DocumentSection[]
   content: ContentNode[]
+  /**
+   * True when this section was synthesised by the pipeline because the
+   * document contained no headings. Its title ("Document") is not derived
+   * from source text and must be excluded from word counts.
+   */
+  synthetic?: boolean
 }
 
 // ---------------------------------------------------------------------------

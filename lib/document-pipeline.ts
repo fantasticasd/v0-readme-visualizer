@@ -277,7 +277,8 @@ function buildSectionTree(
   )
 
   if (headingTokens.length === 0) {
-    // No headings — wrap everything in a single synthetic root section
+    // No headings — wrap everything in a single synthetic root section.
+    // `synthetic: true` tells computeStats to skip counting its title as words.
     const syntheticId = 'document'
     const section: DocumentSection = {
       id: syntheticId,
@@ -289,6 +290,7 @@ function buildSectionTree(
       content: tokens
         .filter((t): t is ContentToken => t.kind === 'content')
         .map(t => t.node),
+      synthetic: true,
     }
     return { sections: [section], flatSections: [section] }
   }
@@ -358,9 +360,41 @@ function buildSectionTree(
 }
 
 /**
+ * Canonical word-count helper.
+ * Requirement: "a" → 1, "Hello world" → 2, "" → 0,
+ *              "Hello\nworld" → 2, "Hello   world" → 2
+ */
+function countWords(text: string): number {
+  return text.trim().split(/\s+/).filter(Boolean).length
+}
+
+// ---------------------------------------------------------------------------
+// Inline self-tests — run once at module load, throw on regression.
+// ---------------------------------------------------------------------------
+;(function selfTestCountWords() {
+  const cases: Array<[string, number]> = [
+    ['a',             1],
+    ['Hello world',   2],
+    ['',              0],
+    ['Hello\nworld',  2],
+    ['Hello   world', 2],
+  ]
+  for (const [input, expected] of cases) {
+    const actual = countWords(input)
+    if (actual !== expected) {
+      throw new Error(
+        `[document-pipeline] countWords regression: ` +
+        `countWords(${JSON.stringify(input)}) = ${actual}, expected ${expected}`,
+      )
+    }
+  }
+})()
+
+/**
  * Compute all stats deterministically from the structured model.
  * Word count includes only paragraph / list / blockquote text and heading
  * titles — code, links, and image metadata are excluded.
+ * Synthetic section titles (no headings in source) are skipped.
  */
 function computeStats(
   flatSections: DocumentSection[],
@@ -372,21 +406,23 @@ function computeStats(
   let wordCount = 0
 
   for (const section of flatSections) {
-    // Count the heading title itself
-    wordCount += section.title.split(/\s+/).filter(Boolean).length
+    // Skip the synthetic fallback title — it is not derived from source text
+    if (!section.synthetic) {
+      wordCount += countWords(section.title)
+    }
 
     for (const node of section.content) {
       switch (node.type) {
         case 'paragraph':
-          wordCount += node.text.split(/\s+/).filter(Boolean).length
+          wordCount += countWords(node.text)
           break
         case 'list':
           node.items.forEach(item => {
-            wordCount += item.split(/\s+/).filter(Boolean).length
+            wordCount += countWords(item)
           })
           break
         case 'blockquote':
-          wordCount += node.text.split(/\s+/).filter(Boolean).length
+          wordCount += countWords(node.text)
           break
         // code, image, table, html, etc. intentionally excluded
       }
