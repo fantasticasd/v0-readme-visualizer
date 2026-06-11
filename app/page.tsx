@@ -1,42 +1,33 @@
 'use client'
 
-import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { UploadScreen } from '@/components/readme/upload-screen'
-import { Dashboard } from '@/components/readme/dashboard'
 import { MOCK_README } from '@/lib/mock-readme'
 
+const SESSION_KEY = 'readme-visualizer:content'
+const FILENAME_KEY = 'readme-visualizer:filename'
+
 export default function Home() {
-  const [content, setContent] = useState<string | null>(null)
-  const [filename, setFilename] = useState('README.md')
+  const router = useRouter()
+
+  const navigate = (text: string, name: string) => {
+    sessionStorage.setItem(SESSION_KEY, text)
+    sessionStorage.setItem(FILENAME_KEY, name)
+    router.push('/viewer')
+  }
 
   const handleLoad = (text: string) => {
-    setContent(text)
+    navigate(text, 'README.md')
   }
 
   const handleLoadMock = () => {
-    setContent(MOCK_README)
-    setFilename('react-query-README.md')
-  }
-
-  const handleReset = () => {
-    setContent(null)
-    setFilename('README.md')
-  }
-
-  if (!content) {
-    return (
-      <UploadScreen
-        onLoad={handleLoad}
-        onLoadMock={handleLoadMock}
-      />
-    )
+    navigate(MOCK_README, 'react-query-README.md')
   }
 
   return (
-    <Dashboard
-      content={content}
-      filename={filename}
-      onReset={handleReset}
+    <UploadScreen
+      onLoad={handleLoad}
+      onLoadMock={handleLoadMock}
     />
   )
 }
