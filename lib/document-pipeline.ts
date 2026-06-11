@@ -1,5 +1,5 @@
 /**
- * Document processing pipeline — 3 strict layers:
+ * Document processing pipeline — strict 3-layer architecture:
  *
  *  RAW INPUT  →  NORMALIZATION (AST)  →  STRUCTURED ParsedDocument
  *
@@ -11,7 +11,10 @@ import { unified } from 'unified'
 import remarkParse from 'remark-parse'
 import remarkGfm from 'remark-gfm'
 import { visit } from 'unist-util-visit'
-import type { Root, Heading, Code, Paragraph, List, Table, Blockquote, Image, Html, Link, ThematicBreak, Text, InlineCode, Node } from 'mdast'
+import type {
+  Root, Heading, Code, Paragraph, List, Table,
+  Blockquote, Image, Html, Link, ThematicBreak, Text, InlineCode, Node,
+} from 'mdast'
 
 import type {
   ParsedDocument,
@@ -20,12 +23,11 @@ import type {
   CodeNode,
   ImageNode,
   DocumentStats,
-  DocumentMetadata,
 } from './document-model'
 
 // ---------------------------------------------------------------------------
 // Layer 1 — RAW INPUT
-// Accepts a raw markdown string exactly as provided; no transformation here.
+// Accept raw markdown string as-is; no transformation.
 // ---------------------------------------------------------------------------
 
 function acceptRawInput(markdown: string): string {
@@ -36,7 +38,7 @@ function acceptRawInput(markdown: string): string {
 // Helpers
 // ---------------------------------------------------------------------------
 
-function slugify(text: string): string {
+export function slugify(text: string): string {
   return text
     .toLowerCase()
     .trim()
@@ -70,37 +72,48 @@ function isBadge(src: string): boolean {
 
 // ---------------------------------------------------------------------------
 // Layer 2 — NORMALIZATION
-// Parse the markdown into an mdast AST and walk it to produce a flat list of
-// (heading | content-node) tokens with deterministic positions.
+// Walk the AST top-level nodes and emit a flat ordered token list.
+// Code blocks are extracted here — no regex, parser-based only.
 // ---------------------------------------------------------------------------
 
-type Token =
-  | { kind: 'heading'; level: number; text: string; position: number }
-  | { kind: 'content'; node: ContentNode }
+type HeadingToken = { kind: 'heading'; level: number; text: string; position: number }
+type ContentToken = { kind: 'content'; node: ContentNode }
+type Token = HeadingToken | ContentToken
 
-let _codeBlockCounter = 0
-
-function normalizeAst(ast: Root): Token[] {
-  _codeBlockCounter = 0
+function normalizeAst(ast: Root): { tokens: Token[]; links: Array<{ href: string; text: string }> } {
+  let codeBlockCounter = 0  // scoped to this call — no module-level mutation
   const tokens: Token[] = []
   let position = 0
+
+  // Extract all links from the entire AST in one pass (catches inline links
+  // inside paragraphs, list items, blockquotes, etc.)
+  const links: Array<{ href: string; text: string }> = []
+  visit(ast, 'link', (node: Link) => {
+    // Exclude image-only links (e.g. badge anchors)
+    const text = extractPlainText(node)
+    links.push({ href: node.url, text })
+  })
 
   for (const child of ast.children) {
     switch (child.type) {
       case 'heading': {
         const h = child as Heading
         const text = extractPlainText(h)
-        tokens.push({ kind: 'heading', level: h.depth, text, position: position++ })
+        if (text) {  // skip empty headings
+          tokens.push({ kind: 'heading', level: h.depth, text, position: position++ })
+        }
         break
       }
 
       case 'code': {
+        // Parser-based extraction — not regex
         const c = child as Code
         const code = c.value.trimEnd()
+        const lang = (c.lang ?? '').toLowerCase().split('{')[0].trim() || 'text'
         const codeNode: CodeNode = {
           type: 'code',
-          id: `code-block-${_codeBlockCounter++}`,
-          language: c.lang || 'text',
+          id: `code-block-${codeBlockCounter++}`,
+          language: lang,
           code,
           lineCount: code.split('\n').length,
           position: position++,
@@ -111,30 +124,25 @@ function normalizeAst(ast: Root): Token[] {
 
       case 'paragraph': {
         const p = child as Paragraph
-        // Check if this paragraph is images-only (badge line etc.)
-        const hasNonImage = p.children.some(c => c.type !== 'image' && c.type !== 'break')
+        // If the paragraph contains only images (badge lines, etc.) — isolate
+        // each image as its own ImageNode rather than a text paragraph
+        const hasNonImage = p.children.some(
+          c => c.type !== 'image' && c.type !== 'break',
+        )
         if (!hasNonImage) {
-          // Extract each image as its own ImageNode
           for (const imgChild of p.children) {
             if (imgChild.type === 'image') {
               const img = imgChild as Image
-              const imgNode: ImageNode = {
-                type: 'image',
-                src: img.url,
-                alt: img.alt || '',
-                position: position++,
-              }
-              tokens.push({ kind: 'content', node: imgNode })
+              tokens.push({
+                kind: 'content',
+                node: { type: 'image', src: img.url, alt: img.alt ?? '', position: position++ },
+              })
             }
           }
         } else {
           tokens.push({
             kind: 'content',
-            node: {
-              type: 'paragraph',
-              text: extractPlainText(p),
-              position: position++,
-            },
+            node: { type: 'paragraph', text: extractPlainText(p), position: position++ },
           })
         }
         break
@@ -142,10 +150,14 @@ function normalizeAst(ast: Root): Token[] {
 
       case 'list': {
         const l = child as List
-        const items: string[] = l.children.map(item => extractPlainText(item))
         tokens.push({
           kind: 'content',
-          node: { type: 'list', ordered: l.ordered ?? false, items, position: position++ },
+          node: {
+            type: 'list',
+            ordered: l.ordered ?? false,
+            items: l.children.map(item => extractPlainText(item)),
+            position: position++,
+          },
         })
         break
       }
@@ -192,88 +204,106 @@ function normalizeAst(ast: Root): Token[] {
     }
   }
 
-  return tokens
+  return { tokens, links }
 }
 
 // ---------------------------------------------------------------------------
 // Layer 3 — OUTPUT STRUCTURE
-// Convert the flat token list into the hierarchical ParsedDocument.
 // ---------------------------------------------------------------------------
 
 /**
- * Normalize heading levels so skipped levels don't produce orphan nodes.
- * E.g. H1 → H3 becomes H1 → H2 in the normalized tree.
- * The algorithm tracks what the "expected next" level is and collapses gaps.
+ * Normalize heading levels so the tree never has orphan / skipped nodes.
+ *
+ * Algorithm: maintain a stack of source levels we have "seen".  When a new
+ * heading comes in:
+ *   - Going deeper  → normalizedLevel = parent.normalized + 1
+ *   - Same level    → normalizedLevel = parent.normalized
+ *   - Going up      → pop until we find an ancestor with a strictly smaller
+ *                     source level; that ancestor's normalized + 1 is our level
+ *
+ * This is O(n) and produces a guaranteed gap-free tree.
  */
 function normalizeHeadingLevels(
-  headingTokens: Array<{ level: number; text: string; position: number }>,
+  headings: Array<{ level: number; text: string; position: number }>,
 ): Array<{ normalizedLevel: number; sourceLevel: number; text: string; position: number }> {
-  if (headingTokens.length === 0) return []
+  if (headings.length === 0) return []
 
+  // Stack entries: { sourceLevel, normalizedLevel }
+  const stack: Array<{ sourceLevel: number; normalizedLevel: number }> = []
   const result: Array<{ normalizedLevel: number; sourceLevel: number; text: string; position: number }> = []
-  // Stack of normalized levels seen so far
-  const stack: number[] = []
 
-  for (const h of headingTokens) {
-    // Find what normalized level this heading should occupy
+  for (const h of headings) {
+    // Pop stack entries whose source level is >= the current heading's level
+    // (they are siblings or deeper, not ancestors)
+    while (stack.length > 0 && stack[stack.length - 1].sourceLevel >= h.level) {
+      stack.pop()
+    }
+
     let normalizedLevel: number
-
     if (stack.length === 0) {
+      // No ancestor — this is a root node
       normalizedLevel = 1
     } else {
-      const lastNormalized = stack[stack.length - 1]
-      const lastSource = result[result.length - 1].sourceLevel
-
-      if (h.level > lastSource) {
-        // Going deeper — assign lastNormalized + 1 (never skip a level)
-        normalizedLevel = lastNormalized + 1
-      } else if (h.level === lastSource) {
-        normalizedLevel = lastNormalized
-      } else {
-        // Going up — pop stack until we find an ancestor with smaller source level
-        while (stack.length > 1 && result[result.findLastIndex(r => r.normalizedLevel === stack[stack.length - 1])]?.sourceLevel >= h.level) {
-          stack.pop()
-        }
-        normalizedLevel = Math.max(1, stack.length > 0 ? stack[stack.length - 1] : 1)
-        // Ensure we don't go deeper than the ancestor
-        while (stack.length > 0 && stack[stack.length - 1] >= normalizedLevel) {
-          stack.pop()
-        }
-        normalizedLevel = (stack.length > 0 ? stack[stack.length - 1] : 0) + 1
-      }
+      // One level deeper than nearest ancestor, capped at parent.normalized + 1
+      // so we never skip a normalized level
+      normalizedLevel = stack[stack.length - 1].normalizedLevel + 1
     }
 
-    // Ensure we never skip levels (max step = +1)
-    if (stack.length > 0) {
-      normalizedLevel = Math.min(normalizedLevel, stack[stack.length - 1] + 1)
-    }
-    normalizedLevel = Math.max(1, normalizedLevel)
-
-    stack.push(normalizedLevel)
-    result.push({ normalizedLevel, sourceLevel: h.level, text: h.text, position: h.position })
+    stack.push({ sourceLevel: h.level, normalizedLevel })
+    result.push({
+      normalizedLevel,
+      sourceLevel: h.level,
+      text: h.text,
+      position: h.position,
+    })
   }
 
   return result
 }
 
+/**
+ * Build the hierarchical section tree from the flat token list.
+ *
+ * Content nodes are assigned to the section that immediately precedes them
+ * in source order (O(n) single pass, no index lookups).
+ */
 function buildSectionTree(
   tokens: Token[],
   dedupMap: Map<string, number>,
 ): { sections: DocumentSection[]; flatSections: DocumentSection[] } {
-  // Separate heading tokens from content tokens and normalize levels
-  const headingRaw = tokens
-    .filter((t): t is Extract<Token, { kind: 'heading' }> => t.kind === 'heading')
-    .map(t => ({ level: t.level, text: t.text, position: t.position }))
+  // --- 1. Collect heading tokens in source order ---
+  const headingTokens = tokens.filter(
+    (t): t is HeadingToken => t.kind === 'heading',
+  )
 
-  const normalized = normalizeHeadingLevels(headingRaw)
+  if (headingTokens.length === 0) {
+    // No headings — wrap everything in a single synthetic root section
+    const syntheticId = 'document'
+    const section: DocumentSection = {
+      id: syntheticId,
+      title: 'Document',
+      level: 1,
+      sourceLevel: 1,
+      index: 0,
+      children: [],
+      content: tokens
+        .filter((t): t is ContentToken => t.kind === 'content')
+        .map(t => t.node),
+    }
+    return { sections: [section], flatSections: [section] }
+  }
 
-  // Build sections with their normalized levels and stable IDs
+  // --- 2. Normalize levels ---
+  const normalized = normalizeHeadingLevels(
+    headingTokens.map(t => ({ level: t.level, text: t.text, position: t.position })),
+  )
+
+  // --- 3. Create section objects with stable deduplicated IDs ---
   const allSections: DocumentSection[] = normalized.map((h, index) => {
     const base = slugify(h.text) || `section-${index}`
     const count = dedupMap.get(base) ?? 0
     dedupMap.set(base, count + 1)
     const id = count === 0 ? base : `${base}-${count}`
-
     return {
       id,
       title: h.text,
@@ -285,36 +315,35 @@ function buildSectionTree(
     }
   })
 
-  // Assign content nodes to their owning section (the last heading before them)
+  // --- 4. Assign content nodes to their owning section (single O(n) pass) ---
+  // Build a position→sectionIndex map for the heading tokens
+  const headingPositionToSectionIdx = new Map<number, number>()
+  headingTokens.forEach((t, idx) => headingPositionToSectionIdx.set(t.position, idx))
+
   let currentSectionIdx = -1
-  let positionCursor = 0
-
-  const sectionByPosition = new Map<number, DocumentSection>()
-  for (const s of allSections) {
-    // Find the position of this section's heading token
-    const headingToken = tokens.find(
-      t => t.kind === 'heading' && t.position === normalized[allSections.indexOf(s)].position,
-    )
-    if (headingToken) sectionByPosition.set(headingToken.position, s)
-  }
-
-  // Walk tokens in order, assigning content to sections
   for (const token of tokens) {
     if (token.kind === 'heading') {
-      const sec = sectionByPosition.get(token.position)
-      if (sec) currentSectionIdx = allSections.indexOf(sec)
-    } else if (currentSectionIdx >= 0) {
-      allSections[currentSectionIdx].content.push(token.node)
+      const idx = headingPositionToSectionIdx.get(token.position)
+      if (idx !== undefined) currentSectionIdx = idx
+    } else {
+      // Content token — assign to current section if one exists
+      if (currentSectionIdx >= 0) {
+        allSections[currentSectionIdx].content.push(token.node)
+      }
     }
-    positionCursor = token.kind === 'content' ? token.node.position : token.position
   }
 
-  // Build the hierarchy using a parent stack
+  // --- 5. Build the parent-child hierarchy ---
   const root: DocumentSection[] = []
+  // parentStack holds the chain of open ancestor sections
   const parentStack: DocumentSection[] = []
 
   for (const section of allSections) {
-    while (parentStack.length > 0 && parentStack[parentStack.length - 1].level >= section.level) {
+    // Pop ancestors that are at the same or deeper level
+    while (
+      parentStack.length > 0 &&
+      parentStack[parentStack.length - 1].level >= section.level
+    ) {
       parentStack.pop()
     }
     if (parentStack.length === 0) {
@@ -328,24 +357,40 @@ function buildSectionTree(
   return { sections: root, flatSections: allSections }
 }
 
+/**
+ * Compute all stats deterministically from the structured model.
+ * Word count includes only paragraph / list / blockquote text and heading
+ * titles — code, links, and image metadata are excluded.
+ */
 function computeStats(
   flatSections: DocumentSection[],
   codeBlocks: CodeNode[],
   links: Array<{ href: string; text: string }>,
   images: ImageNode[],
-  badges: ImageNode[],
   rawMarkdown: string,
 ): DocumentStats {
-  // Word count: only from paragraph / list / blockquote text nodes
   let wordCount = 0
+
   for (const section of flatSections) {
-    for (const node of section.content) {
-      if (node.type === 'paragraph') wordCount += node.text.split(/\s+/).filter(Boolean).length
-      if (node.type === 'list') node.items.forEach(i => { wordCount += i.split(/\s+/).filter(Boolean).length })
-      if (node.type === 'blockquote') wordCount += node.text.split(/\s+/).filter(Boolean).length
-    }
     // Count the heading title itself
     wordCount += section.title.split(/\s+/).filter(Boolean).length
+
+    for (const node of section.content) {
+      switch (node.type) {
+        case 'paragraph':
+          wordCount += node.text.split(/\s+/).filter(Boolean).length
+          break
+        case 'list':
+          node.items.forEach(item => {
+            wordCount += item.split(/\s+/).filter(Boolean).length
+          })
+          break
+        case 'blockquote':
+          wordCount += node.text.split(/\s+/).filter(Boolean).length
+          break
+        // code, image, table, html, etc. intentionally excluded
+      }
+    }
   }
 
   const nonBadgeImages = images.filter(img => !isBadge(img.src))
@@ -361,41 +406,11 @@ function computeStats(
   }
 }
 
-function extractGlobalLists(
-  tokens: Token[],
-): {
-  codeBlocks: CodeNode[]
-  images: ImageNode[]
-  links: Array<{ href: string; text: string }>
-} {
-  const codeBlocks: CodeNode[] = []
-  const images: ImageNode[] = []
-
-  for (const token of tokens) {
-    if (token.kind === 'content') {
-      if (token.node.type === 'code') codeBlocks.push(token.node)
-      if (token.node.type === 'image') images.push(token.node)
-    }
-  }
-
-  return { codeBlocks, images, links: [] }
-}
-
-function extractLinks(ast: Root): Array<{ href: string; text: string }> {
-  const links: Array<{ href: string; text: string }> = []
-  visit(ast, 'link', (node: Link) => {
-    links.push({ href: node.url, text: extractPlainText(node) })
-  })
-  return links
-}
-
 // ---------------------------------------------------------------------------
-// Public API
+// Module-level parse cache — keyed by a stable hash of the raw string.
+// Results are reused across React re-renders without re-parsing.
 // ---------------------------------------------------------------------------
 
-// Module-level parse cache keyed by a simple hash of the markdown string.
-// This ensures the pipeline only runs once per unique input regardless of
-// how many times React re-renders.
 const _parseCache = new Map<number, ParsedDocument>()
 
 function hashString(s: string): number {
@@ -406,33 +421,43 @@ function hashString(s: string): number {
   return h
 }
 
+// ---------------------------------------------------------------------------
+// Public API
+// ---------------------------------------------------------------------------
+
 /**
  * processDocument — the single public entry point.
  *
- * Call from a React `useMemo` (keyed on the raw string) or directly from a
- * server component.  Results are also module-level cached so repeated calls
- * with the same content are free.
+ * Safe to call from a React `useMemo` keyed on the raw string — results are
+ * module-level cached so repeated calls with the same content are O(1).
  */
 export function processDocument(rawMarkdown: string): ParsedDocument {
   const key = hashString(rawMarkdown)
   const cached = _parseCache.get(key)
   if (cached) return cached
 
-  // ------ Layer 1: accept raw input ------
+  // Layer 1: accept raw input
   const raw = acceptRawInput(rawMarkdown)
 
-  // ------ Layer 2: parse to AST & normalize ------
+  // Layer 2: parse AST and normalize into flat token list
   const ast = unified().use(remarkParse).use(remarkGfm).parse(raw) as Root
-  const tokens = normalizeAst(ast)
-  const links = extractLinks(ast)
+  const { tokens, links } = normalizeAst(ast)
 
-  // ------ Layer 3: build output structure ------
+  // Layer 3: build structured output from token list
   const dedupMap = new Map<string, number>()
   const { sections, flatSections } = buildSectionTree(tokens, dedupMap)
-  const { codeBlocks, images } = extractGlobalLists(tokens)
-  const badges = images.filter(img => isBadge(img.src))
 
-  const stats = computeStats(flatSections, codeBlocks, links, images, badges, raw)
+  // Extract global code/image lists from the token stream (no re-parsing)
+  const codeBlocks: CodeNode[] = []
+  const images: ImageNode[] = []
+  for (const token of tokens) {
+    if (token.kind === 'content') {
+      if (token.node.type === 'code') codeBlocks.push(token.node)
+      if (token.node.type === 'image') images.push(token.node)
+    }
+  }
+
+  const stats = computeStats(flatSections, codeBlocks, links, images, raw)
 
   const title =
     flatSections.find(s => s.sourceLevel === 1)?.title ??
@@ -445,7 +470,10 @@ export function processDocument(rawMarkdown: string): ParsedDocument {
     flatSections,
     codeBlocks,
     links,
-    metadata: { images, badges },
+    metadata: {
+      images,
+      badges: images.filter(img => isBadge(img.src)),
+    },
     stats,
     rawMarkdown: raw,
   }
@@ -455,7 +483,7 @@ export function processDocument(rawMarkdown: string): ParsedDocument {
 }
 
 /**
- * clearDocumentCache — call when you want to force a re-parse (e.g. in tests).
+ * clearDocumentCache — force a re-parse on next call (useful in tests).
  */
 export function clearDocumentCache(): void {
   _parseCache.clear()

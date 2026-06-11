@@ -51,14 +51,17 @@ export function Dashboard({ content, filename, onReset }: DashboardProps) {
     })),
   [codeBlocks])
 
-  // Adapt headings (DocumentSection[]) to what SectionTree currently expects
-  // DocumentSection already has id/title/children — just alias 'title' → 'text'
+  // Adapt headings (DocumentSection[]) to what SectionTree currently expects.
+  // Use the normalized `level` (not sourceLevel) so visual depth matches the
+  // gap-free hierarchy produced by the pipeline.
   const headingsCompat = useMemo(() => {
-    function adapt(sections: typeof headings): import('@/lib/markdown-parser').HeadingNode[] {
+    // Local shape matching SectionTree's HeadingNode interface
+    type TreeNode = { id: string; text: string; level: number; children: TreeNode[] }
+    function adapt(sections: typeof headings): TreeNode[] {
       return sections.map(s => ({
         id: s.id,
         text: s.title,
-        level: s.sourceLevel,
+        level: s.level,           // normalized, never has gaps
         children: adapt(s.children),
       }))
     }

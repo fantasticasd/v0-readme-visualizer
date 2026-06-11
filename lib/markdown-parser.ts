@@ -8,20 +8,7 @@
 
 export type { DocumentStats as ReadmeStats, CodeNode as CodeBlock } from './document-model'
 export type { DocumentSection as HeadingNode } from './document-model'
-export { processDocument } from './document-pipeline'
-
-/**
- * slugify — still exported because MarkdownViewer uses it to assign heading
- * IDs that match the normalized model's IDs.
- */
-export function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .trim()
-    .replace(/[^\w\s-]/g, '')
-    .replace(/[\s_-]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-}
+export { processDocument, slugify } from './document-pipeline'
 
 /**
  * highlightText — kept for any future direct use.
