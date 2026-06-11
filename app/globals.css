@@ -83,9 +83,80 @@
   /* #2563EB */ --sidebar-ring: oklch(0.51 0.21 264);
 }
 
+/* ─── Dark mode token overrides ─────────────────────────────────────────── */
+.dark {
+  /* Backgrounds — deep neutral, not pure black */
+  /* #0F1117 */ --background: oklch(0.1 0.006 264);
+  /* #161B22 */ --card: oklch(0.135 0.007 264);
+  /* #1C2128 */ --popover: oklch(0.155 0.008 264);
+
+  /* Foregrounds */
+  /* #E6EDF3 */ --foreground: oklch(0.91 0.008 240);
+  /* #E6EDF3 */ --card-foreground: oklch(0.91 0.008 240);
+  /* #E6EDF3 */ --popover-foreground: oklch(0.91 0.008 240);
+
+  /* Primary — blue, unchanged */
+  /* #3B82F6 */ --primary: oklch(0.60 0.20 264);
+  /* #FFFFFF */ --primary-foreground: oklch(1 0 0);
+
+  /* Secondary / muted */
+  /* #21262D */ --secondary: oklch(0.175 0.008 264);
+  /* #E6EDF3 */ --secondary-foreground: oklch(0.91 0.008 240);
+  /* #21262D */ --muted: oklch(0.175 0.008 264);
+  /* #8B949E */ --muted-foreground: oklch(0.58 0.012 240);
+
+  /* Accent — subtle blue tint */
+  /* #1D2D44 */ --accent: oklch(0.22 0.04 264);
+  /* #3B82F6 */ --accent-foreground: oklch(0.60 0.20 264);
+
+  /* Borders / inputs */
+  /* #30363D */ --border: oklch(0.26 0.008 264);
+  /* #30363D */ --input: oklch(0.26 0.008 264);
+  /* #3B82F6 */ --ring: oklch(0.60 0.20 264);
+
+  /* Destructive */
+  /* #F87171 */ --destructive: oklch(0.70 0.19 25);
+
+  /* Sidebar */
+  /* #161B22 */ --sidebar: oklch(0.135 0.007 264);
+  /* #E6EDF3 */ --sidebar-foreground: oklch(0.91 0.008 240);
+  /* #3B82F6 */ --sidebar-primary: oklch(0.60 0.20 264);
+  /* #FFFFFF */ --sidebar-primary-foreground: oklch(1 0 0);
+  /* #1D2D44 */ --sidebar-accent: oklch(0.22 0.04 264);
+  /* #3B82F6 */ --sidebar-accent-foreground: oklch(0.60 0.20 264);
+  /* #30363D */ --sidebar-border: oklch(0.26 0.008 264);
+  /* #3B82F6 */ --sidebar-ring: oklch(0.60 0.20 264);
+}
+
+/* ─── Glow utilities (dark mode only) ───────────────────────────────────── */
+/* Applied to: active sidebar items, primary buttons, focused inputs */
+.dark .glow-active {
+  box-shadow:
+    0 0 0 1px rgba(37, 99, 235, 0.20),
+    0 0 8px 0  rgba(37, 99, 235, 0.15);
+}
+.dark .glow-focus {
+  box-shadow:
+    0 0 0 2px rgba(37, 99, 235, 0.35),
+    0 0 12px 0 rgba(37, 99, 235, 0.15);
+}
+.dark .glow-primary-btn:hover {
+  box-shadow:
+    0 0 0 1px rgba(37, 99, 235, 0.30),
+    0 0 10px 0 rgba(37, 99, 235, 0.15);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    /* Smooth theme transitions on color-bearing properties only */
+    transition-property: background-color, border-color, color, box-shadow;
+    transition-duration: 200ms;
+    transition-timing-function: ease;
+  }
+  /* Exclude transitions from elements where animation would feel wrong */
+  *:where(svg, path, pre, code) {
+    transition: none;
   }
   body {
     @apply bg-background text-foreground;
@@ -260,10 +331,55 @@
 /* Highlight.js — in prose the <pre> owns the background; keep <code> transparent */
 .readme-prose .hljs { background: transparent !important; }
 
-/* Search highlight — #F59E0B amber tint */
+/* ─── Dark mode prose overrides ─────────────────────────────────────────── */
+.dark .readme-prose {
+  color: oklch(0.78 0.01 240);
+}
+.dark .readme-prose h1,
+.dark .readme-prose h2,
+.dark .readme-prose h3,
+.dark .readme-prose h4,
+.dark .readme-prose h5,
+.dark .readme-prose h6 {
+  color: oklch(0.93 0.007 240);
+}
+.dark .readme-prose h1 { border-bottom-color: oklch(0.26 0.008 264); }
+.dark .readme-prose h2 { border-bottom-color: oklch(0.23 0.007 264); }
+.dark .readme-prose a { color: oklch(0.67 0.17 264); }
+.dark .readme-prose a:hover { color: oklch(0.73 0.15 264); }
+.dark .readme-prose blockquote {
+  border-left-color: oklch(0.45 0.12 264);
+  color: oklch(0.62 0.012 240);
+}
+.dark .readme-prose code {
+  background: oklch(0.20 0.008 264);
+  color: oklch(0.72 0.14 264);
+  border-color: oklch(0.28 0.008 264);
+}
+.dark .readme-prose pre {
+  background: oklch(0.135 0.007 264) !important;
+  border-color: oklch(0.26 0.008 264);
+}
+.dark .readme-prose th {
+  background: oklch(0.175 0.008 264);
+  color: oklch(0.91 0.008 240);
+  border-color: oklch(0.26 0.008 264);
+}
+.dark .readme-prose td {
+  color: oklch(0.75 0.008 240);
+  border-color: oklch(0.24 0.007 264);
+}
+.dark .readme-prose tr:nth-child(even) td { background: oklch(0.155 0.007 264); }
+.dark .readme-prose hr { border-top-color: oklch(0.26 0.008 264); }
+
+/* Search highlight — amber tint adjusted for dark */
 mark.search-highlight {
   background: oklch(0.74 0.16 75 / 28%);
   color: oklch(0.2 0.015 264);
   border-radius: 2px;
   padding: 0 2px;
+}
+.dark mark.search-highlight {
+  background: oklch(0.74 0.16 75 / 22%);
+  color: oklch(0.91 0.008 240);
 }

@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react'
 import { useDropzone } from 'react-dropzone'
 import { FileText, Upload, ClipboardPaste, ArrowRight, BookOpen, Code2, Hash, GitBranch } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { ThemeToggle } from './theme-toggle'
 
 interface UploadScreenProps {
   onLoad: (content: string) => void
@@ -62,6 +63,7 @@ export function UploadScreen({ onLoad, onLoadMock }: UploadScreenProps) {
           <span className="flex items-center gap-1 px-2 py-1 rounded bg-muted/50 border border-border">
             <GitBranch size={11} /> Local only
           </span>
+          <ThemeToggle />
         </div>
       </header>
 

@@ -35,7 +35,7 @@ export function SearchBar({
     <div
       className={cn(
         'flex items-center gap-2 px-3 py-2 rounded-lg border bg-muted/30 transition-all',
-        focused ? 'border-primary/40 ring-1 ring-primary/15' : 'border-border',
+        focused ? 'border-primary/40 ring-1 ring-primary/15 glow-focus' : 'border-border',
         className,
       )}
     >

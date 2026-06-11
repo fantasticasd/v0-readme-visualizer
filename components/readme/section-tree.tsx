@@ -53,7 +53,7 @@ function SectionNode({ node, activeId, searchQuery, onSelect, depth = 0 }: Secti
         className={cn(
           'group relative flex items-center gap-1 py-1 pr-2 rounded-md cursor-pointer transition-all duration-100 select-none',
           isActive
-            ? 'bg-accent/60 text-primary'
+            ? 'bg-accent/60 text-primary glow-active'
             : 'text-muted-foreground hover:text-foreground hover:bg-muted/50',
           textMatches && searchQuery.trim() && !isActive ? 'text-foreground' : '',
         )}

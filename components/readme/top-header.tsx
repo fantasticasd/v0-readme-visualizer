@@ -1,6 +1,7 @@
 'use client'
 
 import { BookOpen, FileText, RotateCcw } from 'lucide-react'
+import { ThemeToggle } from './theme-toggle'
 interface StatsShape {
   wordCount: number
   headingCount: number
@@ -52,6 +53,8 @@ export function TopHeader({ filename, stats, onReset }: TopHeaderProps) {
             <span className="ml-1">read</span>
           </span>
         </div>
+
+        <ThemeToggle />
 
         <button
           onClick={onReset}
